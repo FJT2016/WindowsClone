@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 11 Clone</title>
+    <style>
+        /* --- CSS STYLES --- */
+        body, html { margin: 0; padding: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; height: 100%; user-select: none; }
+        
+        /* Desktop Wallpaper */
+        #desktop {
+            background-image: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?ixlib=rb-1.2.1&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* Desktop Icon */
+        .icon {
+            width: 80px;
+            height: 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+            cursor: pointer;
+            margin: 10px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .icon:hover { background-color: rgba(255, 255, 255, 0.1); }
+        .icon img { width: 40px; margin-bottom: 5px; }
+        .icon span { font-size: 12px; }
+
+        /* The Window Class */
+        .window {
+            position: absolute;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            overflow: hidden;
+            animation: popIn 0.2s ease-out;
+            border: 1px solid #ccc;
+        }
+        
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Window Header (Draggable Area) */
+        .title-bar {
+            height: 35px;
+            background: #f3f3f3;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            cursor: default;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        .title-bar h4 { margin: 0; font-size: 12px; font-weight: normal; margin-left: 10px; color: #333; }
+        
+        /* Window Controls */
+        .controls div {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+        }
+        .controls div:hover { background: #e0e0e0; }
+        .close-btn:hover { background: #e81123 !important; color: white !important; }
+
+        /* Browser Specific Styles */
+        .address-bar {
+            padding: 8px;
+            background: #f9f9f9;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+        }
+        .address-input {
+            flex-grow: 1;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 15px;
+            padding: 4px 15px;
+            font-size: 12px;
+            color: #555;
+        }
+
+        /* Taskbar */
+        #taskbar {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 48px;
+            background: rgba(243, 243, 243, 0.85);
+            backdrop-filter: blur(15px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            z-index: 10000;
+        }
+        
+        .taskbar-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 4px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .taskbar-icon:hover { background: rgba(255,255,255,0.5); }
+        .taskbar-icon:active { transform: scale(0.9); }
+        .taskbar-icon img { width: 24px; }
+
+        /* Start Menu */
+        #start-menu {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 500px;
+            height: 500px;
+            background: rgba(243, 243, 243, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            display: none;
+            padding: 20px;
+            z-index: 9999;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div id="desktop">
+        <div style="position: absolute; top: 10px; left: 10px; width: 100px;">
+            <div class="icon" onclick="openWindow('notepad')">
+                <img src="https://img.icons8.com/color/48/000000/notepad.png" alt="Notepad">
+                <span>Notepad</span>
+            </div>
+            <div class="icon" onclick="openWindow('edge')">
+                <img src="https://img.icons8.com/color/48/000000/microsoft-edge-new.png" alt="Edge">
+                <span>Edge</span>
+            </div>
+        </div>
+
+        <div id="notepad" class="window" style="width: 500px; height: 350px; top: 100px; left: 100px;" onmousedown="bringToFront('notepad')">
+            <div class="title-bar" id="notepad-header">
+                <div style="display:flex; align-items:center;">
+                    <img src="https://img.icons8.com/color/48/000000/notepad.png" width="16" style="margin-right:5px;">
+                    <h4>Untitled - Notepad</h4>
+                </div>
+                <div class="controls">
+                    <div>&#9472;</div>
+                    <div>&#9633;</div>
+                    <div class="close-btn" onclick="closeWindow('notepad')">&#10005;</div>
+                </div>
+            </div>
+            <div class="content" style="height: 100%; padding: 0;">
+                <textarea style="width: 100%; height: 85%; border: none; padding: 10px; outline: none; resize: none; font-family: monospace;">Type something here...</textarea>
+            </div>
+        </div>
+
+        <div id="edge" class="window" style="width: 800px; height: 500px; top: 150px; left: 150px;" onmousedown="bringToFront('edge')">
+            <div class="title-bar" id="edge-header">
+                <div style="display:flex; align-items:center;">
+                    <img src="https://img.icons8.com/color/48/000000/microsoft-edge-new.png" width="16" style="margin-right:5px;">
+                    <h4>New Tab - Microsoft Edge</h4>
+                </div>
+                <div class="controls">
+                    <div>&#9472;</div>
+                    <div>&#9633;</div>
+                    <div class="close-btn" onclick="closeWindow('edge')">&#10005;</div>
+                </div>
+            </div>
+            <div class="address-bar">
+                <div style="cursor:pointer">&#8592;</div>
+                <div style="cursor:pointer">&#8594;</div>
+                <div style="cursor:pointer">&#8635;</div>
+                <input type="text" class="address-input" value="https://www.wikipedia.org" readonly>
+            </div>
+            <iframe src="https://www.wikipedia.org" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+
+        <div id="start-menu">
+            <h3 style="margin-top:0; color: #333;">Pinned</h3>
+            <div style="display: flex; gap: 20px;">
+                <div class="icon" style="color: black;" onclick="openWindow('notepad')">
+                    <img src="https://img.icons8.com/color/48/000000/notepad.png">
+                    <span>Notepad</span>
+                </div>
+                <div class="icon" style="color: black;" onclick="openWindow('edge')">
+                    <img src="https://img.icons8.com/color/48/000000/microsoft-edge-new.png">
+                    <span>Edge</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="taskbar">
+            <div class="taskbar-icon" onclick="toggleStart()">
+                <img src="https://img.icons8.com/color/48/000000/windows-11.png" alt="Start">
+            </div>
+            <div class="taskbar-icon" onclick="openWindow('notepad')">
+                <img src="https://img.icons8.com/color/48/000000/notepad.png" alt="Notepad">
+            </div>
+            <div class="taskbar-icon" onclick="openWindow('edge')">
+                <img src="https://img.icons8.com/color/48/000000/microsoft-edge-new.png" alt="Edge">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* --- JAVASCRIPT LOGIC --- */
+        
+        let zIndex = 10; // State to track window stacking
+
+        // Initialize Draggable Windows
+        dragElement(document.getElementById("notepad"));
+        dragElement(document.getElementById("edge"));
+
+        function dragElement(elmnt) {
+            var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            var header = document.getElementById(elmnt.id + "-header");
+            
+            if (header) {
+                header.onmousedown = dragMouseDown;
+            }
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+                bringToFront(elmnt.id); // Bring to front when dragging starts
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+                elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        // Bring the clicked window to the front
+        function bringToFront(id) {
+            zIndex++;
+            document.getElementById(id).style.zIndex = zIndex;
+            // Also close start menu if it's open
+            document.getElementById('start-menu').style.display = "none";
+        }
+
+        function openWindow(id) {
+            var win = document.getElementById(id);
+            win.style.display = "flex";
+            bringToFront(id); // Bring to front on open
+            document.getElementById('start-menu').style.display = "none";
+        }
+
+        function closeWindow(id) {
+            document.getElementById(id).style.display = "none";
+        }
+
+        function toggleStart() {
+            var menu = document.getElementById('start-menu');
+            if (menu.style.display === "block") {
+                menu.style.display = "none";
+            } else {
+                menu.style.display = "block";
+                menu.style.zIndex = zIndex + 100; // Always top
+            }
+        }
+        
+        // Close start menu when clicking on desktop
+        document.getElementById('desktop').addEventListener('click', function(e) {
+            if(e.target.id === 'desktop') {
+                document.getElementById('start-menu').style.display = "none";
+            }
+        });
+    </script>
+</body>
+</html>
